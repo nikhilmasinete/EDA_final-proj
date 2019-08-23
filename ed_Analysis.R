@@ -12,7 +12,13 @@ SCC <- readRDS("Pollution/Source_Classification_Code.rds")
 ####--------------------------------------PART-1---------------------------------------------####
 ###-------------------------------------------------------------------------------------------###
 ##---------------------------------------------------------------------------------------------##
-boxplot(year~Emissions,NEI)
+years <- matrix(0,nrow = 4,ncol = 2)
+years <- data.frame(years)
+years[,1] <- as.character(unique(sub1$year))
+for (i in 1:4){
+  years[i,2] <- sum(NEI$Emissions[NEI$year==unique(NEI$year)[i]])
+}
+barplot(years[,2],names.arg = years[,1])
 title(main = "PM 2.5 Emissions over the years",xlab="Years", ylab="PM 2.5 Emissions" )
 dev.copy(png,"plot1.png")
 dev.off()
@@ -20,11 +26,31 @@ dev.off()
 ###-------------------------------------------------------------------------------------------###
 ####--------------------------------------PART-2---------------------------------------------####
 ###-------------------------------------------------------------------------------------------###
-##---------------------------------------------------------------------------------------------##
-sub1 <- subset(NEI, fips == "24510")
+##-------------------------------------------------PPPP
 years <- matrix(0,nrow = 4,ncol = 2)
-years[,1] <- unique(sub1$year)
+years <- as.data.frame(years)
+years[,1] <- as.character(unique(sub1$year))
 for (i in 1:4){
   years[i,2] <- sum(sub1$Emissions[sub1$year==unique(sub1$year)[i]])
 }
-years <- as.data.frame(years)
+barplot(years[,2],names.arg = years[,1])
+title(main = "PM 2.5 Emissions over the years",xlab="Years", ylab="PM 2.5 Emissions" )
+dev.copy(png,"plot2.png")
+dev.off()
+##---------------------------------------------------------------------------------------------##
+###-------------------------------------------------------------------------------------------###
+####--------------------------------------PART-3---------------------------------------------####
+###-------------------------------------------------------------------------------------------###
+##---------------------------------------------------------------------------------------------##
+sub1 <- subset(NEI, fips == "24510")
+point <- data.frame(matrix(0,nrow = 4,ncol = 5))
+point[,1] <- as.character(unique(sub1$year))
+for (i in 1:4){
+  point[i,2] <- mean(sub1$Emissions[sub1$year==unique(sub1$year)[i] & sub1$type == "POINT"])
+  point[i,3] <- mean(sub1$Emissions[sub1$year==unique(sub1$year)[i] & sub1$type == "NONPOINT"])
+  point[i,4] <- mean(sub1$Emissions[sub1$year==unique(sub1$year)[i] & sub1$type == "ON-ROAD"])
+  point[i,5] <- mean(sub1$Emissions[sub1$year==unique(sub1$year)[i] & sub1$type == "NON-ROAD"])
+}
+names(point) <- c("Years","POINT","NON-POINT","ON-ROAD","NON-ROAD")
+d <- melt(point,id.vars = "Years")
+g1 <- ggplot(d,aes(Years,value,col=variable))+geom_point()+geom_line()+stat_smooth
